@@ -1,0 +1,25 @@
+{
+  "name": "agro-nxt",
+  "version": "1.0.0",
+  "description": "AgRO NXT - AI-Based Smart Agriculture Decision Intelligence Platform",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev": "concurrently \"cd server && npm start\" \"cd client && npm start\"",
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "seed": "cd server && npm run seed"
+  },
+  "keywords": [
+    "agriculture",
+    "AI",
+    "farming",
+    "recommendations",
+    "agritech"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
