@@ -57,8 +57,8 @@ const sampleSchemes = [
   },
 ];
 
-// Get all schemes
-router.get('/', authMiddleware, async (req, res) => {
+// Get all schemes (public)
+router.get('/', async (req, res) => {
   try {
     let schemes = await Scheme.find();
     
@@ -73,8 +73,8 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Get schemes by state
-router.get('/state/:state', authMiddleware, async (req, res) => {
+// Get schemes by state (public)
+router.get('/state/:state', async (req, res) => {
   try {
     const schemes = await Scheme.find({
       eligibleStates: { $in: [req.params.state, 'All States'] },
@@ -85,8 +85,8 @@ router.get('/state/:state', authMiddleware, async (req, res) => {
   }
 });
 
-// Check eligibility
-router.post('/check-eligibility', authMiddleware, async (req, res) => {
+// Check eligibility (public)
+router.post('/check-eligibility', async (req, res) => {
   try {
     const { landSize, state, cropType } = req.body;
     

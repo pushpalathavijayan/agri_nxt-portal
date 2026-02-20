@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, Button } from '../components/Common';
 
 const VoiceAssistant = () => {
   const [isListening, setIsListening] = useState(false);
   const [recognizedText, setRecognizedText] = useState('');
   const [aiResponse, setAiResponse] = useState('');
+  const recognitionRef = useRef(null);
 
   const mockResponses = [
     'Based on current market prices, rice is expected to yield better returns this season.',
@@ -13,31 +14,95 @@ const VoiceAssistant = () => {
     'Your farm is eligible for the PM KISAN scheme. Apply through your nearest center.',
   ];
 
-  const handleStartListening = () => {
-    setIsListening(true);
-    setRecognizedText('');
-    setAiResponse('');
+  useEffect(() => {
+    // Initialize Web Speech API if available
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recog = new SpeechRecognition();
+      recog.lang = 'en-US';
+      recog.interimResults = false;
+      recog.maxAlternatives = 1;
 
-    // Simulate voice recognition
-    setTimeout(() => {
-      const mockQueries = [
-        'What crop should I plant?',
-        'How can I increase my profit?',
-        'What are the government schemes available?',
-        'How is my soil health?',
-      ];
-      const randomQuery = mockQueries[Math.floor(Math.random() * mockQueries.length)];
-      setRecognizedText(randomQuery);
-    }, 2000);
+      recog.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        setRecognizedText(text);
+        generateResponse(text);
+      };
+
+      recog.onerror = (err) => {
+        console.error('Speech recognition error', err);
+        setAiResponse('Sorry, I could not understand. Please try again.');
+        setIsListening(false);
+      };
+
+      recog.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recog;
+    }
+  }, []);
+
+  const generateResponse = (text) => {
+    const t = text.toLowerCase();
+
+    if (t.includes('scheme') || t.includes('government')) {
+      setAiResponse('You can browse government schemes on the Schemes page. Try filtering by your state to find eligible schemes.');
+      return;
+    }
+
+    if (t.includes('crop') || t.includes('plant')) {
+      setAiResponse('To recommend a crop I need season and soil pH. Please provide those details or use the Crop Recommendation page.');
+      return;
+    }
+
+    if (t.includes('profit') || t.includes('income')) {
+      setAiResponse('Use the Profit Simulation page to estimate investment vs profit for different crops.');
+      return;
+    }
+
+    if (t.includes('soil')) {
+      setAiResponse('You can check soil health in the Sustainability page. Consider entering NPK values for a tailored recommendation.');
+      return;
+    }
+
+    // Default: return a random helpful message
+    const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    setAiResponse(randomResponse);
+  };
+
+  const handleStartListening = () => {
+    setAiResponse('');
+    setRecognizedText('');
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        // Some browsers throw if started twice
+        console.warn('Speech recognition start error', e);
+      }
+    } else {
+      // Fallback to simulated recognition
+      setIsListening(true);
+      setTimeout(() => {
+        const mockQueries = [
+          'What crop should I plant?',
+          'How can I increase my profit?',
+          'What are the government schemes available?',
+          'How is my soil health?',
+        ];
+        const randomQuery = mockQueries[Math.floor(Math.random() * mockQueries.length)];
+        setRecognizedText(randomQuery);
+        generateResponse(randomQuery);
+        setIsListening(false);
+      }, 1500);
+    }
   };
 
   const handleStopListening = () => {
+    if (recognitionRef.current) recognitionRef.current.stop();
     setIsListening(false);
-    // Simulate AI response
-    setTimeout(() => {
-      const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-      setAiResponse(randomResponse);
-    }, 1000);
   };
 
   const handleClear = () => {
@@ -138,7 +203,7 @@ const VoiceAssistant = () => {
 
       <Card className="mt-4 bg-yellow-50 border-l-4 border-yellow-500">
         <p className="text-sm text-gray-700">
-          <strong>Note:</strong> This is a demo voice interface. In production, this would integrate with speech recognition APIs (Web Speech API, Google Cloud Speech-to-Text, etc.) and advanced NLP models.
+          <strong>Note:</strong> This uses the browser Web Speech API when available. If your browser does not support it, a simulated demo response will be used.
         </p>
       </Card>
     </div>

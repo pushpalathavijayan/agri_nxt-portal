@@ -8,6 +8,7 @@ const GovernmentSchemes = () => {
   const [error, setError] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [filteredSchemes, setFilteredSchemes] = useState([]);
+  const [selectedScheme, setSelectedScheme] = useState(null);
 
   const states = [
     'All States', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -104,7 +105,7 @@ const GovernmentSchemes = () => {
                 </div>
               )}
 
-              <Button variant="primary" className="w-full text-sm">
+              <Button variant="primary" className="w-full text-sm" onClick={() => setSelectedScheme(scheme)}>
                 Learn More
               </Button>
             </Card>
@@ -134,6 +135,52 @@ const GovernmentSchemes = () => {
           </p>
         </Card>
       </div>
+      {/* Modal for scheme details */}
+      {selectedScheme && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 p-6">
+            <div className="flex justify-between items-start">
+              <h2 className="text-2xl font-bold text-green-700">{selectedScheme.schemeName}</h2>
+              <button className="text-gray-600" onClick={() => setSelectedScheme(null)}>✕</button>
+            </div>
+            <p className="text-gray-700 mt-4">{selectedScheme.description}</p>
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+              <div>
+                <p className="font-semibold">Land Size</p>
+                <p>{selectedScheme.minLandSize} - {selectedScheme.maxLandSize} hectares</p>
+              </div>
+              <div>
+                <p className="font-semibold">Subsidy</p>
+                <p>{selectedScheme.subsidy}%</p>
+              </div>
+              <div>
+                <p className="font-semibold">Crops</p>
+                <p>{selectedScheme.cropType.join(', ')}</p>
+              </div>
+              <div>
+                <p className="font-semibold">States</p>
+                <p>{selectedScheme.eligibleStates.join(', ')}</p>
+              </div>
+            </div>
+
+            {selectedScheme.requirements && selectedScheme.requirements.length > 0 && (
+              <div className="mt-4 bg-blue-50 p-3 rounded-lg">
+                <p className="font-semibold text-sm mb-2">Requirements:</p>
+                <ul className="text-xs text-gray-700 list-disc list-inside">
+                  {selectedScheme.requirements.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="mt-6 flex gap-4 justify-end">
+              <Button variant="secondary" onClick={() => setSelectedScheme(null)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
